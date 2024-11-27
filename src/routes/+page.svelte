@@ -1,95 +1,90 @@
-<script context="module" lang="ts">
-	export const prerender = true; // Enable static prerendering for better performance
-</script>
-
 <script>
 	import { onMount } from 'svelte';
+	import { fetchPosts } from '$lib/api';
+	import Feed from '$components/Feed.svelte';
+  
 	let posts = [];
 	let feedA = [];
 	let feedB = [];
 	let favorites = new Set();
-
-	// Fetch posts from the API (replace with your actual API endpoint)
+  
+	// Check if running in the browser
+	const isBrowser = typeof window !== 'undefined';
+  
+	// Fetch posts from the API when the component is mounted
 	onMount(async () => {
-		const res = await fetch('https://api.example.com/posts');
-		posts = await res.json();
-		feedA = posts.filter((post) => post.filter === 'A');
-		feedB = posts.filter((post) => post.filter === 'B');
-
-		// Load favorites from localStorage
-		const storedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-		storedFavorites.forEach((id) => favorites.add(id));
+	  posts = await fetchPosts();
 	});
 
-	// Function to toggle favorite status
-	const toggleFavorite = (postId) => {
-		if (favorites.has(postId)) {
-			favorites.delete(postId);
-		} else {
-			favorites.add(postId);
+	$: {
+		if (posts.length > 0) {
+			feedA = posts.filter((post) => post.categories.includes(23));
+			feedB = posts.filter((post) => post.categories.includes(22));
+			console.log('Updated Feed A:', feedA);
+			console.log('Updated Feed B:', feedB);
 		}
-		// Update localStorage
-		localStorage.setItem('favorites', JSON.stringify([...favorites]));
-		dispatchFavoriteChange();
-	};
+  	}
 
-	// Dispatch custom event to notify other tabs
-	const dispatchFavoriteChange = () => {
-		window.dispatchEvent(new CustomEvent('favorites-changed'));
-	};
-
-	// Listen for favorite changes in other tabs
-	window.addEventListener('favorites-changed', () => {
+	// Reactively update feeds based on posts (if necessary)
+	// Svelte will automatically update feedA and feedB if posts change
+	$: {
+	  // Only filter if posts have been updated (this ensures reactivity)
+	  if (posts.length > 0) {
+		feedA = posts.filter((post) => post.categories.includes(23));
+		feedB = posts.filter((post) => post.categories.includes(22));
+	  }
+	}
+  
+	// Load favorites from localStorage only on the client-side
+	if (isBrowser) {
+	  const storedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+	  storedFavorites.forEach((id) => favorites.add(id));
+  
+	  // Listen for changes across tabs on the client-side
+	  window.addEventListener('favorites-changed', () => {
 		const storedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
 		favorites = new Set(storedFavorites);
-	});
-</script>
-
-<main>
-	<h1>Feed A</h1>
-	<div>
-		{#each feedA as post}
-			<div class="post">
-				<h2>{post.title}</h2>
-				<p>{post.content}</p>
-				<button on:click={() => toggleFavorite(post.id)}>
-					{favorites.has(post.id) ? 'Unfavorite' : 'Favorite'}
-				</button>
-			</div>
-		{/each}
-	</div>
-
-	<h1>Feed B</h1>
-	<div>
-		{#each feedB as post}
-			<div class="post">
-				<h2>{post.title}</h2>
-				<p>{post.content}</p>
-				<button on:click={() => toggleFavorite(post.id)}>
-					{favorites.has(post.id) ? 'Unfavorite' : 'Favorite'}
-				</button>
-			</div>
-		{/each}
-	</div>
-</main>
-
-<style>
-	.post {
-		margin-bottom: 20px;
-		border: 1px solid #ddd;
-		padding: 10px;
+	  });
 	}
-
-	button {
-		background-color: #6200ee;
-		color: white;
-		padding: 10px 20px;
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
+  
+	// Function to toggle favorite status
+	const toggleFavorite = (postId) => {
+	  if (favorites.has(postId)) {
+		favorites.delete(postId);
+	  } else {
+		favorites.add(postId);
+	  }
+	  // Update localStorage
+	  if (isBrowser) {
+		localStorage.setItem('favorites', JSON.stringify([...favorites]));
+		dispatchFavoriteChange();
+	  }
+	};
+  
+	// Dispatch custom event to notify other tabs
+	const dispatchFavoriteChange = () => {
+	  if (isBrowser) {
+		window.dispatchEvent(new CustomEvent('favorites-changed'));
+	  }
+	};
+  </script>
+  
+  <main>
+	{#if posts.length === 0}
+	  <p>Loading posts...</p>  <!-- Display loading message until posts are fetched -->
+	{:else}
+	  <h1>Feed A</h1>
+	  <Feed posts={feedA} favorites={favorites} toggleFavorite={toggleFavorite} />
+  
+	  <h1>Feed B</h1>
+	  <Feed posts={feedB} favorites={favorites} toggleFavorite={toggleFavorite} />
+	{/if}
+  </main>
+  
+  <style>
+	h1 {
+	  font-size: 24px;
+	  margin-top: 40px;
 	}
-
-	button:hover {
-		background-color: #3700b3;
-	}
-</style>
+  </style>
+  
