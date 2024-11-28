@@ -30,10 +30,16 @@
 	  storedFavourites.forEach((id) => favourites.add(id));
   
 	  // Listen for changes across tabs on the client-side
-	  window.addEventListener('favourites-changed', () => {
-		const storedFavourites = JSON.parse(localStorage.getItem('favourites') || '[]');
-		favourites = new Set(storedFavourites);
-	  });
+		window.addEventListener('favourites-changed', () => {
+			const storedFavourites = JSON.parse(localStorage.getItem('favourites') || '[]');
+			favourites = new Set(storedFavourites);
+		});
+
+		// Replicate the changes across tabs.
+		window.addEventListener('storage', () => {
+			const updatedFavourites = JSON.parse(localStorage.getItem('favourites') || '[]');
+			favourites = new Set(updatedFavourites); // Update favourites in the current tab
+		});
 	}
   
 	// Function to toggle favourite status
