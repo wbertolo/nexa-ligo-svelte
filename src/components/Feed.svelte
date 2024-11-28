@@ -5,7 +5,7 @@
 	export let posts = [];
 	export let favourites;
 	export let toggleFavourite;
-  
+	console.log(posts);
   </script>
   
   <div class="feed">

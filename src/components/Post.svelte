@@ -5,9 +5,10 @@
 	export let favourites;
 	export let toggleFavourite;
 
-	const isFavourite = favourites.has(post.id);
+	$: isFavourite = favourites.has(post.id);
 	const title = DOMPurify.sanitize(post.title.rendered);
 	const excerpt = DOMPurify.sanitize(post.excerpt.rendered);
+
 </script>
 
 <div class="post p-5 mb-5 border">

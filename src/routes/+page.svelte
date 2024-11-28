@@ -16,13 +16,11 @@
 	  posts = await fetchPosts();
 	});
 
-	// Reactively update feeds based on posts (if necessary)
-	// Svelte will automatically update feedA and feedB if posts change
+	// Reactively update feeds based on posts
 	$: {
-	  // Only filter if posts have been updated (this ensures reactivity)
 	  if (posts.length > 0) {
 		feedA = posts.filter((post) => post.categories.includes(23));
-		feedB = posts.filter((post) => post.categories.includes(22));
+		feedB = posts.filter((post) => post.categories.some(category => [22, 23].includes(category)));
 	  }
 	}
   
@@ -72,7 +70,7 @@
 			</div>
 
 			<div class="feed-container basis-[45%]">
-				<h2>Spotify Posts</h2>
+				<h2>Travel Spotify and Posts</h2>
 				<Feed posts={feedB} favourites={favourites} toggleFavourite={toggleFavourite} />
 			</div>
 		</div>
