@@ -6,7 +6,7 @@
 	let posts = [];
 	let feedA = [];
 	let feedB = [];
-	let favorites = new Set();
+	let favourites = new Set();
   
 	// Check if running in the browser
 	const isBrowser = typeof window !== 'undefined';
@@ -15,15 +15,6 @@
 	onMount(async () => {
 	  posts = await fetchPosts();
 	});
-
-	$: {
-		if (posts.length > 0) {
-			feedA = posts.filter((post) => post.categories.includes(23));
-			feedB = posts.filter((post) => post.categories.includes(22));
-			console.log('Updated Feed A:', feedA);
-			console.log('Updated Feed B:', feedB);
-		}
-  	}
 
 	// Reactively update feeds based on posts (if necessary)
 	// Svelte will automatically update feedA and feedB if posts change
@@ -35,56 +26,57 @@
 	  }
 	}
   
-	// Load favorites from localStorage only on the client-side
+	// Load favourites from localStorage only on the client-side
 	if (isBrowser) {
-	  const storedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-	  storedFavorites.forEach((id) => favorites.add(id));
+	  const storedFavourites = JSON.parse(localStorage.getItem('favourites') || '[]');
+	  storedFavourites.forEach((id) => favourites.add(id));
   
 	  // Listen for changes across tabs on the client-side
-	  window.addEventListener('favorites-changed', () => {
-		const storedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-		favorites = new Set(storedFavorites);
+	  window.addEventListener('favourites-changed', () => {
+		const storedFavourites = JSON.parse(localStorage.getItem('favourites') || '[]');
+		favourites = new Set(storedFavourites);
 	  });
 	}
   
-	// Function to toggle favorite status
-	const toggleFavorite = (postId) => {
-	  if (favorites.has(postId)) {
-		favorites.delete(postId);
+	// Function to toggle favourite status
+	const toggleFavourite = (postId) => {
+	  if (favourites.has(postId)) {
+		favourites.delete(postId);
 	  } else {
-		favorites.add(postId);
+		favourites.add(postId);
 	  }
 	  // Update localStorage
 	  if (isBrowser) {
-		localStorage.setItem('favorites', JSON.stringify([...favorites]));
-		dispatchFavoriteChange();
+		localStorage.setItem('favourites', JSON.stringify([...favourites]));
+		dispatchFavouriteChange();
 	  }
 	};
   
 	// Dispatch custom event to notify other tabs
-	const dispatchFavoriteChange = () => {
+	const dispatchFavouriteChange = () => {
 	  if (isBrowser) {
-		window.dispatchEvent(new CustomEvent('favorites-changed'));
+		window.dispatchEvent(new CustomEvent('favourites-changed'));
 	  }
 	};
   </script>
   
-  <main>
+  <main class="p-5">
 	{#if posts.length === 0}
-	  <p>Loading posts...</p>  <!-- Display loading message until posts are fetched -->
+	  <p>Loading posts...</p>
 	{:else}
-	  <h1>Feed A</h1>
-	  <Feed posts={feedA} favorites={favorites} toggleFavorite={toggleFavorite} />
+		<div class="flex flex-row justify-between">
+
+			<div class="feed-container basis-[45%]">
+				<h2>Travel Posts</h2>
+				<Feed posts={feedA} favourites={favourites} toggleFavourite={toggleFavourite} />
+			</div>
+
+			<div class="feed-container basis-[45%]">
+				<h2>Spotify Posts</h2>
+				<Feed posts={feedB} favourites={favourites} toggleFavourite={toggleFavourite} />
+			</div>
+		</div>
   
-	  <h1>Feed B</h1>
-	  <Feed posts={feedB} favorites={favorites} toggleFavorite={toggleFavorite} />
 	{/if}
   </main>
-  
-  <style>
-	h1 {
-	  font-size: 24px;
-	  margin-top: 40px;
-	}
-  </style>
   

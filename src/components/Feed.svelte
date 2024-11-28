@@ -1,23 +1,18 @@
 <script>
 	import Post from './Post.svelte';
   
-	// Define props
+	// Props
 	export let posts = [];
-	export let favorites;
-	export let toggleFavorite;
-	export let test;
+	export let favourites;
+	export let toggleFavourite;
   
-	// Log posts to verify
-	console.log('Received posts in Feed:', posts);
-	console.log(test);
-
   </script>
   
   <div class="feed">
 	{#if posts.length > 0}
 		<div class="feed">
 			{#each posts as post (post.id)}
-				<Post {post} {favorites} {toggleFavorite} />
+				<Post post={post} favourites={favourites} toggleFavourite={toggleFavourite} />
 			{/each}
 		</div>
 	{:else}

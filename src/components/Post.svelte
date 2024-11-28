@@ -1,37 +1,22 @@
 <script>
-	export let post;
-	export let favorites;
-	export let toggleFavorite;
+	import DOMPurify from 'dompurify';
 
-	const isFavorite = favorites.has(post.id);
-	console.log('post', post);
+	export let post;
+	export let favourites;
+	export let toggleFavourite;
+
+	const isFavourite = favourites.has(post.id);
+	const title = DOMPurify.sanitize(post.title.rendered);
+	const excerpt = DOMPurify.sanitize(post.excerpt.rendered);
 </script>
 
-<div class="post">
-	<h2>{post.title}</h2>
-	<p>{post.content}</p>
-	<button on:click={() => toggleFavorite(post.id)}>
-		{isFavorite ? 'Unfavorite' : 'Favorite'}
+<div class="post p-5 mb-5 border">
+	<h3>{@html title}</h3>
+	<p>{@html excerpt}</p>
+	<button 
+		class="bg-[#6200ee] hover:bg-[#3700b3] text-white py-2 px-3 border rounded-md cursor-pointer"
+		on:click={() => toggleFavourite(post.id)}
+	>
+		{isFavourite ? 'Unfavourite' : 'Favourite'}
 	</button>
 </div>
-
-<style>
-	.post {
-		margin-bottom: 20px;
-		border: 1px solid #ddd;
-		padding: 10px;
-	}
-
-	button {
-		background-color: #6200ee;
-		color: white;
-		padding: 10px 20px;
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
-	}
-
-	button:hover {
-		background-color: #3700b3;
-	}
-</style>
