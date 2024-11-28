@@ -1,14 +1,13 @@
 <script>
 	import Post from './Post.svelte';
-  
+
 	// Props
 	export let posts = [];
 	export let favourites;
 	export let toggleFavourite;
-	console.log(posts);
-  </script>
-  
-  <div class="feed">
+</script>
+
+<div class="feed">
 	{#if posts.length > 0}
 		<div class="feed">
 			{#each posts as post (post.id)}
@@ -18,6 +17,5 @@
 	{:else}
 		<p>No posts to display.</p>
 	{/if}
-	
-  </div>
+</div>
   
